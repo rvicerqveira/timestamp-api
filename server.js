@@ -2,6 +2,7 @@ var express = require('express')
 var app = express()
 var moment = require('moment')
 var path = require('path')
+require('dotenv').config({silent: true})
 var port = process.env.PORT || 8080
 
 app.use(express.static(path.join(__dirname, './public')))
@@ -14,22 +15,27 @@ app.get('/', function (req, res) {
 
 app.get('/:time', function (req, res) {
   var time = req.params.time
-  var timestamp = {
-    "unix": null,
-    "natural": null
-  }
-  if(!isNaN(Number(time))){
-    time = Number(time)*1000
-  }
-  time = new Date(time)
-  if(!isNaN(time)){
-    timestamp = {
-      "unix": Number(moment(time).format("X")),
-      "natural": moment(time).format("MMMM D, YYYY")
+  if (time !== 'favicon.ico'){
+    var timestamp = {
+      "unix": null,
+      "natural": null
     }
+    if(!isNaN(Number(time))){
+      time = Number(time)*1000
+    }
+    time = new Date(time)
+    if(!isNaN(time)){
+      timestamp = {
+        "unix": Number(moment(time).format("X")),
+        "natural": moment(time).format("MMMM D, YYYY")
+      }
+    }
+    res.writeHead(200, { 'Content-Type': 'application/json' })
+    res.end(JSON.stringify(timestamp))
+  }else{
+    res.writeHead(404)
+    res.end()
   }
-  res.writeHead(200, { 'Content-Type': 'application/json' })
-  res.end(JSON.stringify(timestamp))
 })
 
 app.listen(port, function () {
